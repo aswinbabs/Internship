@@ -152,10 +152,10 @@ Account Holder's name: Aswin
 Account Number: 123123123
 Account Balance: 15000
 ```
-##🎯 **Key Takeaways from Assignment1**
-- Demonstrates the use of constructors to initialize object attributes.
-- Implements encapsulation with private members and public methods.
-- Showcases OOP principles like data hiding, abstraction, and reusability.
+## 🎯 **Key Takeaways**
+1. Demonstrates the use of constructors to initialize object attributes.
+2. Implements encapsulation with private members and public methods.
+3. Showcases OOP principles like data hiding, abstraction, and reusability.
 
 ## 3️⃣ **Assignment 2**
 
@@ -354,7 +354,7 @@ Account Balance:60000
 
 ---
 
-### Key Takeaways
+## 🎯 **Key Takeaways**
 1. Using `std::vector` provides dynamic storage for objects.
 2. STL algorithms like `std::sort` and `std::find_if` simplify operations on collections.
 3. Function overloading enhances code readability and flexibility.
@@ -430,7 +430,7 @@ int main()
 8
 32
 ```
-### Key Takeaways
+## 🎯 **Key Takeaways**
 1. Understanding Templates in C++
 2. Usage of sizeof Operator
 3. Instantiation of Template Classes
