@@ -69,6 +69,8 @@ Deposit money.
 Withdraw money.
 Print account details.
 
+**Program Code**
+
 ```cpp
 #include <iostream>
 
@@ -150,8 +152,285 @@ Account Holder's name: Aswin
 Account Number: 123123123
 Account Balance: 15000
 ```
-##🎯 **Key Takeaways from Assignment1**
-- Demonstrates the use of constructors to initialize object attributes.
-- Implements encapsulation with private members and public methods.
-- Showcases OOP principles like data hiding, abstraction, and reusability.
+## 🎯 **Key Takeaways**
+1. Demonstrates the use of constructors to initialize object attributes.
+2. Implements encapsulation with private members and public methods.
+3. Showcases OOP principles like data hiding, abstraction, and reusability.
 
+## 3️⃣ **Assignment 2**
+
+📝 Problem Statement
+Use `std::vector` to store multiple bank accounts using the `BankAccount` class from Assignment 1.
+
+### Reference
+- [https://en.cppreference.com/w/cpp/container/vector](https://en.cppreference.com/w/cpp/container/vector)
+
+### Functions to Implement
+
+1. **Add a new bank account**
+   void addBankAccount(int accountNumber, std::string accountHolderName, int balance);
+2. **Display all account details**
+   void displayDetails();
+3. **Sort account details by account balance using `std::sort`**
+   void sortAccounts();
+4. **Search for a bank account detail by account number using `std::find_if` (Function Overloading)**
+   void displayDetails(int accountNumber);
+
+**Program Code**
+
+```cpp
+#include <iostream> 
+#include <string> 
+#include <vector> 
+#include <algorithm>
+
+class BankAccounts {
+private:
+    static int counter;
+    int sl_no;
+    std::string accname;
+    int accnum;
+    double accbalance;
+
+public:
+    BankAccounts(std::string name, int num, double balance) {
+        sl_no = ++counter;
+        accname = name;
+        accnum = num;
+        accbalance = balance;
+    }
+
+    void displayDetails() const {
+        std::cout << "\nSl.No: " << sl_no 
+                  << "\nAccount Holder's Name: " << accname 
+                  << "\nAccount Number: " << accnum 
+                  << "\nAccount Balance: " << accbalance << std::endl;
+    }
+
+    double getBalance() const { return accbalance; }
+    int getAccountNumber() const { return accnum; }
+};
+
+int BankAccounts::counter = 0;
+
+void addBankAccount(std::vector<BankAccounts>& v, std::string& name, int num, double balance) {
+    v.emplace_back(name, num, balance);
+}
+
+void sortAccounts(std::vector<BankAccounts>& v) {
+    std::sort(v.begin(), v.end(), [](const BankAccounts& a, const BankAccounts& b) {
+        return a.getBalance() < b.getBalance();
+    });
+}
+
+void searchAccount(const std::vector<BankAccounts>& v, int searchNum) {
+    auto it = std::find_if(v.begin(), v.end(), [searchNum](const BankAccounts& acc) {
+        return acc.getAccountNumber() == searchNum;
+    });
+
+    if (it != v.end()) {
+        std::cout << "\nAccount found:\n";
+        it->displayDetails();
+    } else {
+        std::cout << "\nAccount not found.\n";
+    }
+}
+
+int main() {
+    std::vector<BankAccounts> v;
+    int choice, tempNum, sNum;
+    std::string tempName;
+    double tempBalance;
+
+    v.emplace_back("Aswin", 100000000, 55000);
+    v.emplace_back("Aquinas", 100000001, 30000);
+
+    while (true) {
+        std::cout << "\n1. Add new bank account\n";
+        std::cout << "2. Display all the account details\n";
+        std::cout << "3. Sort by balance\n";
+        std::cout << "4. Search by account number\n";
+        std::cout << "0. Exit\n";
+        std::cin >> choice;
+
+        switch (choice) {
+        case 1:
+            std::cout << "\nFor new registration, Enter Name, A/C number, and Balance:\n";
+            std::cin >> tempName >> tempNum >> tempBalance;
+            addBankAccount(v, tempName, tempNum, tempBalance);
+            break;
+        case 2:
+            for (const auto& account : v) {
+                account.displayDetails();
+            }
+            break;
+        case 3:
+            sortAccounts(v);
+            for (const auto& account : v) {
+                account.displayDetails();
+            }
+            break;
+        case 4:
+            std::cout << "\nEnter the Account Number to search: ";
+            std::cin >> sNum;
+            searchAccount(v, sNum);
+            break;
+        case 0:
+            std::cout << "\nExiting the program. Goodbye!\n";
+            return 0;
+        default:
+            std::cout << "\nInvalid choice, please try again.\n";
+            break;
+        }
+    }
+}
+```
+
+---
+
+**Output**
+
+```
+1. Add new bank account
+2. Display all the account details
+3. Sort by balance
+4. Search by account number
+1
+For new registration Enter Name,A/C number and Balance
+Arjun 100000002 60000
+1. Add new bank account
+2. Display all the account details
+3. Sort by balance
+4. Search by account number
+2
+Final list
+Sl.No:1
+Account Holder's name:Aswin
+Account Number:100000000
+Account Balance:55000
+Sl.No:2
+Account Holder's name:Aquinas
+Account Number:100000001
+Account Balance:30000
+Sl.No:3
+Account Holder's name:Arjun
+Account Number:100000002
+Account Balance:60000
+1. Add new bank account
+2. Display all the account details
+3. Sort by balance
+4. Search by account number
+3
+Sl.No:2
+Account Holder's name:Aquinas
+Account Number:100000001
+Account Balance:30000
+Sl.No:1
+Account Holder's name:Aswin
+Account Number:100000000
+Account Balance:55000
+Sl.No:3
+Account Holder's name:Arjun
+Account Number:100000002
+Account Balance:60000
+1. Add new bank account
+2. Display all the account details
+3. Sort by balance
+4. Search by account number
+4
+Enter the Account Number to search: 100000002
+Account found:
+
+Sl.No:3
+Account Holder's name:Arjun
+Account Number:100000002
+Account Balance:60000
+1. Add new bank account
+2. Display all the account details
+3. Sort by balance
+4. Search by account number
+
+```
+
+---
+
+## 🎯 **Key Takeaways**
+1. Using `std::vector` provides dynamic storage for objects.
+2. STL algorithms like `std::sort` and `std::find_if` simplify operations on collections.
+3. Function overloading enhances code readability and flexibility.
+
+## 4️⃣ **Assignment 3**
+
+📝 Problem Statement
+● Create a template class named TypeChecker with a single template parameter T.
+● Add a member function called printSize to the class. This function should output the size
+of the type T using sizeof.
+● Instantiate the class with different types, such as int, float, double, and std::string.
+● Call the printSize function for each instance to display the size of the corresponding
+type.
+● Example input :
+int main()
+{
+TypeChecker<int> a;
+TypeChecker<bool> b;
+TypeChecker<double> c;
+TypeChecker<std::string> d;
+a.printSize ();
+b.printSize ();
+c.printSize ();
+d.printSize ();
+return 0;
+}
+● Output :
+Size of variable : 4
+Size of variable : 1
+Size of variable : 8
+Size of variable : 40
+**Program Code**
+
+```cpp
+#include <iostream>
+
+template<typename T>
+class TypeChecker
+{
+private:
+    T size;
+public:
+    int printSize() 
+    { 
+
+        return sizeof(size);
+    }
+    
+};
+int main()
+{
+
+
+    TypeChecker<int> a;
+    TypeChecker<bool> b;
+    TypeChecker<double> c;
+    TypeChecker<std::string> d;
+    
+    std::cout << a.printSize() << std::endl;
+    std::cout << b.printSize() << std::endl;
+    std::cout << c.printSize() << std::endl;
+    std::cout << d.printSize() << std::endl;
+
+
+     std::cin.get();
+
+}
+```
+**Output**
+```
+4
+1
+8
+32
+```
+## 🎯 **Key Takeaways**
+1. Understanding Templates in C++
+2. Usage of sizeof Operator
+3. Instantiation of Template Classes
