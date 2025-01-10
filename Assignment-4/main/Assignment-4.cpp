@@ -8,18 +8,31 @@
 #include "driver/i2c.h"
 //#include "driver/gpio.h"
 
-// I2C pins and OLED address
-// #define I2C_SDA GPIO_NUM_21
-// #define I2C_SCL GPIO_NUM_22
-// #define OLED_ADDR 0x3C
+#include <cstring>
+
+// I2C pins
+const gpio_num_t i2c_sda_pin = GPIO_NUM_22;
+const gpio_num_t i2c_scl_pin = GPIO_NUM_21;
 
 // U8g2 object
 u8g2_t u8g2;
 
-
+void init_i2c() 
+{
+    i2c_config_t conf;
+    memset(&conf, 0, sizeof(i2c_config_t));
+    conf.mode = I2C_MODE_MASTER;
+    conf.sda_io_num = i2c_sda_pin;
+    conf.sda_pullup_en = GPIO_PULLUP_ENABLE;
+    conf.scl_io_num = i2c_scl_pin;
+    conf.scl_pullup_en = GPIO_PULLUP_ENABLE;
+    conf.master.clk_speed = 400000;
+    ESP_ERROR_CHECK(i2c_param_config(I2C_NUM_1, &conf));
+    ESP_ERROR_CHECK(i2c_driver_install(I2C_NUM_1, conf.mode, 0, 0, 0));
+}
 extern "C" void app_main(void)
 {
-
+    init_i2c();
 // Initialize U8g2 HAL
     u8g2_esp32_hal_t u8g2_hal = U8G2_ESP32_HAL_DEFAULT;
     u8g2_hal.sda = U8G2_ESP32_HAL_UNDEFINED;
@@ -27,7 +40,7 @@ extern "C" void app_main(void)
     u8g2_esp32_hal_init(u8g2_hal);
 
     // Initialize U8g2 with HAL
-    u8g2_Setup_ssd1306_128x64_noname_1(&u8g2,U8G2_R0, // Screen rotation
+    u8g2_Setup_ssd1306_i2c_128x64_noname_f(&u8g2,U8G2_R0, // Screen rotation
     u8g2_esp32_i2c_byte_cb, // ESP32 I2C callback
     u8g2_esp32_gpio_and_delay_cb // Delay callback
     );
