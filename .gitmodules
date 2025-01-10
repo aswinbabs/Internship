@@ -1,0 +1,6 @@
+[submodule "Assignment-4/components/u8g2"]
+	path = Assignment-4/components/u8g2
+	url = https://github.com/olikraus/u8g2.git
+[submodule "Assignment-4/components/esp32-u8g2-hal"]
+	path = Assignment-4/components/esp32-u8g2-hal
+	url = https://github.com/mohammedshuhad/esp32-u8g2-hal.git
