@@ -1,7 +1,7 @@
 {
     "version":            "1.1",
     "project_name":       "Mp3player",
-    "project_version":    "4a3e800-dirty",
+    "project_version":    "3dc90ed-dirty",
     "project_path":       "C:/Users/Admin/Documents/Internship/Internship/Mp3player",
     "idf_path":           "C:/Espressif/frameworks/esp-idf-v5.4",
     "build_dir":          "C:/Users/Admin/Documents/Internship/Internship/Mp3player/build",
