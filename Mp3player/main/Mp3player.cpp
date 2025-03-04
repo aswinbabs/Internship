@@ -1,4 +1,151 @@
+//Mp3Player.cpp
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "driver/uart.h" 
+#include "driver/gpio.h"
+#include "esp_log.h"
+#include <stdio.h>
+#include <iostream>
+#include "Mp3player.hpp"
+
+extern "C" void app_main()
+{
+    gpio_init();
+    ESP_LOGI(TAG, "Initializing DFPlayer Mini...");
+    init_uart();
+    
+    // Allow DFPlayer to initialize
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    
+    int prev_button1 = 1;
+    int prev_button2 = 1;
+    int prev_button3 = 1;
+    int prev_button4 = 1;
+    bool play = false;
+    
+    // Initial volume setup
+    set_volume(0x0A, true);
+    
+    // Show initial status information
+    ESP_LOGI(TAG, "Initial player status:");
+    vTaskDelay(pdMS_TO_TICKS(100));
+    display_player_status();
+    
+    // Variables to track press durations
+    TickType_t button1_press_start = 0;
+    TickType_t button2_press_start = 0;
+    TickType_t button3_press_start = 0;
+    TickType_t button4_press_start = 0;
+
+    while (1) 
+    {
+        int button1 = gpio_get_level(BUTTON_1);
+        int button2 = gpio_get_level(BUTTON_2);
+        int button3 = gpio_get_level(BUTTON_3);
+        int button4 = gpio_get_level(BUTTON_4);
+
+        // Button 1: Handle press and long press
+        if (button1 == 0 && prev_button1 == 1)
+        {   
+            button1_press_start = xTaskGetTickCount();
+            ESP_LOGI(TAG, "Button 1 : Next ");
+        } 
+        if (button1 == 1 && prev_button1 == 0) {
+            TickType_t press_duration = xTaskGetTickCount() - button1_press_start;
+            if (press_duration < pdMS_TO_TICKS(LONG_PRESS_THRESHOLD)) {
+                next_mp3(true);  
+                ESP_LOGI(TAG, "Playing Next track...");
+            } 
+            else 
+            {
+                if (press_duration > pdMS_TO_TICKS(LONG_PRESS_THRESHOLD) && 
+                press_duration % pdMS_TO_TICKS(200) < pdMS_TO_TICKS(20)) 
+                {
+                    volumePlus();
+                    ESP_LOGI(TAG, "Volume +");
+                }
+            }
+        }
+        prev_button1 = button1;
+
+        // Button 2: Toggle play/pause
+        if (button2 == 0 && prev_button2 == 1) {
+            button2_press_start = xTaskGetTickCount();
+            play = !play;
+            ESP_LOGI(TAG, "Play / Pause : %s", play ? "PLAY" : "PAUSE");
+        } 
+        if (button2 == 1 && prev_button2 == 0)
+        {
+            TickType_t press_duration = xTaskGetTickCount() - button2_press_start;
+            if (press_duration < pdMS_TO_TICKS(LONG_PRESS_THRESHOLD)) {
+                if (play)
+                {
+                    playback(true);
+                }
+                else
+                {
+                    pause_mp3(true);
+                }
+            }
+            else {
+                // On long press, get current volume
+                get_volume();
+            }
+        }
+        prev_button2 = button2;
+
+        // Button 3: Handle press and long press
+        if (button3 == 0 && prev_button3 == 1) {
+            button3_press_start = xTaskGetTickCount();
+            ESP_LOGI(TAG, "Button 3 pressed");
+        } 
+        if (button3 == 1 && prev_button3 == 0) {
+            TickType_t press_duration = xTaskGetTickCount() - button3_press_start;
+            if (press_duration < pdMS_TO_TICKS(LONG_PRESS_THRESHOLD)) {
+                prev_mp3(true);
+                ESP_LOGI(TAG, "Playing previous track....");
+            } 
+            else 
+            {
+                if (press_duration > pdMS_TO_TICKS(LONG_PRESS_THRESHOLD) && 
+                press_duration % pdMS_TO_TICKS(200) < pdMS_TO_TICKS(20)) 
+                {
+                    volumeMinus(true);
+                    ESP_LOGI(TAG, "Volume -");
+                }
+            }
+        }
+        prev_button3 = button3;
+
+        // Button 4: Handle press and long press
+        if (button4 == 0 && prev_button4 == 1) {
+            button4_press_start = xTaskGetTickCount();
+            ESP_LOGI(TAG, "Button 4 pressed");
+        } 
+        if (button4 == 1 && prev_button4 == 0) {
+            TickType_t press_duration = xTaskGetTickCount() - button4_press_start;
+            if (press_duration < pdMS_TO_TICKS(LONG_PRESS_THRESHOLD)) {
+                // specifyPlay_mp3(0x00, 0x03);   // folder / name
+                get_total_files();
+                // ESP_LOGI(TAG, "Playing specific track (folder 0, file 3)");
+            } else {
+                // Show full status information on long press
+                ESP_LOGI(TAG, "Displaying full player status...");
+                display_player_status();
+            }
+        }
+        prev_button4 = button4;
+
+        vTaskDelay(10 / portTICK_PERIOD_MS);
+    }
+}
+
+
+
+
+/*
+//Mp3Player.cpp   ,   The version has only Tx , no responses from DFmini
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -23,6 +170,7 @@ extern "C" void app_main()
     int prev_button3 = 1;
     int prev_button4 = 1;
     bool play = false;
+    //set_volume(0x05);
     
     // Variables to track press durations
     TickType_t button1_press_start = 0;
@@ -41,7 +189,7 @@ extern "C" void app_main()
         if (button1 == 0 && prev_button1 == 1)
         {   
             button1_press_start = xTaskGetTickCount();
-            ESP_LOGD(TAG, "Button 1 : Next ");
+            ESP_LOGI(TAG, "Button 1 : Next ");
         } 
         if (button1 == 1 && prev_button1 == 0) {
             
@@ -49,14 +197,16 @@ extern "C" void app_main()
             if (press_duration < pdMS_TO_TICKS(LONG_PRESS_THRESHOLD)) {
                 
                 next_mp3();  
-                ESP_LOGD(TAG, "Playing Next track...");
+                ESP_LOGI(TAG, "Playing Next track...");
 
             } 
             else 
             {
-                while(!(button1 == 1 && prev_button1 == 0))
+                if (press_duration > pdMS_TO_TICKS(LONG_PRESS_THRESHOLD) && 
+                press_duration % pdMS_TO_TICKS(200) < pdMS_TO_TICKS(20)) 
                 {
                     volumePlus();
+                    ESP_LOGI(TAG, "Volume +");
                 }
             }
         }
@@ -64,7 +214,7 @@ extern "C" void app_main()
 
         if (button2 == 0 && prev_button2 == 1) {
             play = !play;
-            ESP_LOGD(TAG, "Play / Pause : %s", play ? "PLAY" : "PAUSE");
+            ESP_LOGI(TAG, "Play / Pause : %s", play ? "PLAY" : "PAUSE");
         } 
         if (button2 == 1 && prev_button2 == 0)
         {
@@ -88,11 +238,15 @@ extern "C" void app_main()
             TickType_t press_duration = xTaskGetTickCount() - button3_press_start;
             if (press_duration < pdMS_TO_TICKS(LONG_PRESS_THRESHOLD)) {
                 prev_mp3();
-                ESP_LOGD(TAG, "Playing previous track....");
-            } else {
-                while(!(button3 == 1 && prev_button3 == 0))
+                ESP_LOGI(TAG, "Playing previous track....");
+            } 
+            else 
+            {
+                if (press_duration > pdMS_TO_TICKS(LONG_PRESS_THRESHOLD) && 
+                press_duration % pdMS_TO_TICKS(200) < pdMS_TO_TICKS(20)) 
                 {
                     volumeMinus();
+                    ESP_LOGI(TAG, "Volume -");
                 }
             }
         }
@@ -109,7 +263,7 @@ extern "C" void app_main()
     }
 }
 
-
+*/
 //////////////////////////////////////////
 
 
